@@ -148,6 +148,12 @@
       player.posterImage.hide(); //Hide Poster Image to provide feedback of video loading status to user
       player.bigPlayButton.hide(); //Hide Play Button to provide feedback of video loading status to user
       player.ads.endLinearAdMode();
+      if (settings.src[1]){
+        console.log(settings.src);
+        settings.src = settings.src[1];
+        console.log(settings.src);
+        player.trigger('adsready');
+      };
     };
     player.preroll.timeupdate = function(e) {
       player.loadingSpinner.hide();
