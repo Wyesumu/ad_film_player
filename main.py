@@ -44,11 +44,12 @@ class Film(db.Model):
 
 	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 	name = db.Column(db.String())
+	url = db.Column(db.String())
 	video = db.Column(db.String())
 	episodes = db.relationship('Episode', backref='film', lazy=True)
 
 	def __repr__(self):
-		return self.name
+		return self.url
 
 class Episode(db.Model):
 
@@ -125,8 +126,13 @@ class SettingsModel(ModelView):
 
 class FilmModel(ModelView):
 	form_extra_fields = {
-		'file': FileUploadField('file', base_path = app.config['UPLOAD_FOLDER'], namegen = prefix_name)
+		'file': FileUploadField('Загрузка файла', base_path = app.config['UPLOAD_FOLDER'], namegen = prefix_name)
 	}
+	form_excluded_columns = ('episodes')
+	column_labels = dict(name='Название', url='Ссылка')
+
+	create_template = 'admin_edit.html'
+	edit_template = 'admin_edit.html'
 
 	def is_accessible(self):
 		if not basic_auth.authenticate():
@@ -139,12 +145,15 @@ class FilmModel(ModelView):
 
 	def on_model_change(self, form, Film, is_created=False):
 		if not form.video.data:
-			Film.video = os.path.join(app.config['UPLOAD_FOLDER'], form.file.data.filename)
+			try:
+				Film.video = os.path.join(app.config['UPLOAD_FOLDER'], form.file.data.filename)
+			except:
+				pass
 
 admin = Admin(app, name='Control panel', template_mode='bootstrap3', index_view=MyAdminIndexView(), url='/')
-admin.add_view(SettingsModel(Setting, db.session, 'Settings', url='/admin/settings'))
-admin.add_view(FilmModel(Film, db.session, 'Movies', url='/admin/films'))
-admin.add_view(FilmModel(Episode, db.session, 'Episodes', url='/admin/episodes'))
+admin.add_view(SettingsModel(Setting, db.session, 'Настройки', url='/admin/settings'))
+admin.add_view(FilmModel(Film, db.session, 'Фильмы', url='/admin/films'))
+admin.add_view(FilmModel(Episode, db.session, 'Эпизоды', url='/admin/episodes'))
 
 #------------------/flask_admin/---------------------------
 
@@ -200,10 +209,17 @@ def get_file():
 	resp.headers.add('Content-Range', 'bytes {0}-{1}/{2}'.format(start, start + length - 1, file_size))
 	return resp
 
-@app.route('/<video_name>')
-def index(video_name):
-	video = Film.query.filter_by(name=video_name).first()
+@app.route('/<video_url>')
+def index(video_url):
+	ep_id = flask.request.args.get('ep')
+	if ep_id:
+		video = Episode.query.get(ep_id)
+	else:
+		video = Film.query.filter_by(url=video_url).first()
 	if video:
+		if not video.video:
+			if video.episodes:
+				video = video.episodes[0]
 		return flask.render_template('index.html', video=video)
 	else:
 		raise NotFoundException('File not found, try different name')

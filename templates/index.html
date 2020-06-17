@@ -1,5 +1,6 @@
 <head>
   <link href="https://vjs.zencdn.net/7.8.2/video-js.css" rel="stylesheet" />
+  <title>{%if video.film %}{{video.film.name}} -{%endif%} {{video.name}}</title>
 
   <!-- If you'd like to support IE8 (for Video.js versions prior to v7) -->
   <script src="https://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script>
@@ -12,6 +13,23 @@
 </head>
 
 <style type="text/css">
+
+.video-js .vjs-big-play-button {
+  top: auto;
+  bottom: 10px;
+}
+
+  a {
+    color: white;
+    text-decoration: none;
+}
+
+a:hover 
+{
+     color:#00A0C6; 
+     text-decoration:none; 
+     cursor:pointer;  
+}
   #my_overlay {
   background:rgba(0,0,0,0.5);
   width: 90%;
@@ -40,9 +58,43 @@
   cursor:pointer;
   position:absolute;
 }
+div#tabs{position:absolute;z-index:999;padding:10px}div#tabs>select{padding:5px 10px;margin-right:5px;background:#222832;color:#fff;border:1px solid #5e636a;overflow:hidden}div#tabs>.fancy-select{display:inline-block;width: 125px;}div.fancy-select{font-family:Arial;position:relative;font-weight:700;font-size:13px;color:#46565D}div.fancy-select.disabled{opacity:.5}div.fancy-select div.trigger{border-radius:0;cursor:pointer;padding:6px 15px 10px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;background:#222732;border-top:3px solid #5e636a;color:#4B5468;box-shadow:0 1px 2px rgba(0,0,0,.2);min-width:100px;transition:all 240ms ease-out;-webkit-transition:all 240ms ease-out;-moz-transition:all 240ms ease-out;-ms-transition:all 240ms ease-out;-o-transition:all 240ms ease-out}div.fancy-select div.trigger:after{content:"";display:block;position:absolute;width:0;height:0;border:5px solid transparent;border-top-color:#4B5468;top:12px;right:15px}div.fancy-select div.trigger.open{background:#4A5368;color:#fff}div.fancy-select div.trigger.open:after{border-top-color:#7A8498}div.fancy-select ul.options{list-style:none;margin:0;position:absolute;top:40px;left:0;visibility:hidden;opacity:0;z-index:50;max-height:200px;overflow:auto;padding:0;background: #5e636a;border-radius:0;border-top:1px solid #5e636a;box-shadow:0 1px 2px rgba(0,0,0,.2);min-width:125px;transition:opacity .3s ease-out,top .3s ease-out,visibility .3s ease-out;-webkit-transition:opacity .3s ease-out,top .3s ease-out,visibility .3s ease-out;-moz-transition:opacity .3s ease-out,top .3s ease-out,visibility .3s ease-out;-ms-transition:opacity .3s ease-out,top .3s ease-out,visibility .3s ease-out;-o-transition:opacity .3s ease-out,top .3s ease-out,visibility .3s ease-out;}div.fancy-select ul.options.open{visibility:visible;top:35px;opacity:1;transition:opacity .3s ease-out,top .3s ease-out;-webkit-transition:opacity .3s ease-out,top .3s ease-out;-moz-transition:opacity .3s ease-out,top .3s ease-out;-ms-transition:opacity .3s ease-out,top .3s ease-out;-o-transition:opacity .3s ease-out,top .3s ease-out}div.fancy-select ul.options.overflowing{top:auto;bottom:40px;transition:opacity .3s ease-out,bottom .3s ease-out,visibility .3s ease-out;-webkit-transition:opacity .3s ease-out,bottom .3s ease-out,visibility .3s ease-out;-moz-transition:opacity .3s ease-out,bottom .3s ease-out,visibility .3s ease-out;-ms-transition:opacity .3s ease-out,bottom .3s ease-out,visibility .3s ease-out;-o-transition:opacity .3s ease-out,bottom .3s ease-out,visibility .3s ease-out}div.fancy-select ul.options.overflowing.open{top:auto;bottom:50px;transition:opacity .3s ease-out,bottom .3s ease-out;-webkit-transition:opacity .3s ease-out,bottom .3s ease-out;-moz-transition:opacity .3s ease-out,bottom .3s ease-out;-ms-transition:opacity .3s ease-out,bottom .3s ease-out;-o-transition:opacity .3s ease-out,bottom .3s ease-out}div.fancy-select ul.options li{padding:8px 12px;color:#ccc;cursor:pointer;white-space:nowrap;transition:all 150ms ease-out;-webkit-transition:all 150ms ease-out;-moz-transition:all 150ms ease-out;-ms-transition:all 150ms ease-out;-o-transition:all 150ms ease-out}div.fancy-select ul.options li.selected{background: rgb(34, 39, 50);color:rgba(255,255,255,.75);}div.fancy-select ul.options li.hover{color:#fff;background: rgba(34,39,50,.51);}
 </style>
 
 <body>
+  {% if video.episodes %}
+  <div id="tabs" style="position: absolute; z-index: 999; padding: 10px;right: 0;">
+    <div class="fancy-select">
+      <select style="display: block; width: 1px; height: 1px; position: absolute; top: 0px; left: 0px; opacity: 0;" id="episodes" class="dropdown fancified" name="episodes">
+        {% for el in video.episodes %}
+        <option value="4" {% if el.name == video.name%}selected{%endif%}> {{el.name}} </option>
+        {% endfor %}
+      </select>
+      <div class="trigger"> {{video.name}} </div>
+      <ul class="options">
+        {% for el in video.episodes%}
+        <li {% if el.name == video.name%}selected{%endif%}><a href="{{el.film.name}}?ep={{el.id}}"> {{el.name}} </a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  {% elif video.film %}
+  <div id="tabs" style="position: absolute; z-index: 999; padding: 10px;right: 0;">
+    <div class="fancy-select">
+      <select style="display: block; width: 1px; height: 1px; position: absolute; top: 0px; left: 0px; opacity: 0;" id="episodes" class="dropdown fancified" name="episodes">
+        {% for el in video.film.episodes %}
+        <option value="4" {% if el.name == video.name%}selected{%endif%}> {{el.name}} </option>
+        {% endfor %}
+      </select>
+      <div class="trigger"> {{video.name}} </div>
+      <ul class="options">
+        {% for el in video.film.episodes%}
+        <li {% if el.name == video.name%}selected{%endif%}><a href="{{el.film.name}}?ep={{el.id}}"> {{el.name}} </a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  {% endif%}
   <div>
     <video
       id="my-video"
@@ -53,7 +105,7 @@
       data-setup="{}"
       style="width: 100%;height: 100%;"
     >
-      <source src="{{url_for('get_file', video_n=video.video)}}" type="video/mp4" />
+      <source src="{{url_for('get_file', video_n=video.video, id=video.id)}}" type="video/mp4" />
       <p class="vjs-no-js">
         To view this video please enable JavaScript, and consider upgrading to a
         web browser that
@@ -77,6 +129,22 @@
 </body>
 
 <script type="text/javascript">
+
+    $(document).ready(function(){
+      $(".trigger").on("click", function(){
+        if ($('.options').hasClass('open')){
+          $('.options').removeClass('open');
+        }else{
+          $('.options').addClass('open');
+        }
+        if ($(this).hasClass('open')){
+          $(this).removeClass('open');
+        }else{
+          $(this).addClass('open');
+        }
+      });
+    });
+
   videojs('my-video',{},function(){
     var player = this;
 
@@ -92,8 +160,17 @@
         $("#myoverlay").fadeOut(); player.play();
      });
     player.preroll({
-      skipTime: 10,
-      src:[{src:"{{url_for('get_file', video_n='advertisement.mp4')}}",type:"video/mp4"},{src:"{{url_for('get_file', video_n='try2.mp4')}}",type:"video/mp4"}]
+      skipTime: 5,
+      repeatAd: true,
+      src:[{src:"{{url_for('get_file', video_n='advertisement.mp4')}}",type:"video/mp4"},{src:"{{url_for('get_file', video_n='try2.mp4')}}",type:"video/mp4"}, {src:"{{url_for('get_file', video_n='advertisement.mp4')}}",type:"video/mp4"}]
     });
+    var midrollTriggered = false;
+    setInterval(function(){
+      if (player.currentTime() > player.duration()/2 && player.currentSrc() == "{{url_for('get_file', video_n=video.video)}}" && !midrollTriggered){
+        midrollTriggered = true;
+        console.log('middle')
+        player.trigger('readyformidroll')
+      }
+    },5000)
   });
 </script>

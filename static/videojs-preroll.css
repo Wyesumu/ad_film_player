@@ -1,7 +1,7 @@
 .preroll-skip-button, .advertisement-box, .remaining-time {
   display: block;
   position: absolute;
-  top: 5px;
+  bottom: 40px;
   right: 0;
   width: auto;
   background-color: rgba(0,0,0,.5);

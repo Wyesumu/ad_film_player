@@ -1,0 +1,31 @@
+{% extends 'admin/model/edit.html' %}
+
+{% block tail %}
+    <script type="text/javascript">
+    	$('#video').hide();
+    	$('label[for="video"]').hide();
+
+    	$('#name').on('input',function () {
+			var str = $('#name').val()
+
+			str = str.replace(/^\s+|\s+$/g, ''); // trim
+		    str = str.toLowerCase();
+		  
+		    // remove accents, swap ñ for n, etc
+		    var from = "àáäâèéëêìíïîòóöôùúüûñç·/_,:;абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
+		    var to   = "aaaaeeeeiiiioooouuuunc------abvgdeejzijklmnoprstufhccss-i-eua";
+		    for (var i=0, l=from.length ; i<l ; i++) {
+		        str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
+		    }
+
+		    str = str.replace(/[^a-z0-9 -]/g, '') // remove invalid chars
+		        .replace(/\s+/g, '-') // collapse whitespace and replace by -
+		        .replace(/-+/g, '-'); // collapse dashes
+
+		    $('#url').val(str)
+
+		})
+
+    </script>
+
+{% endblock %}

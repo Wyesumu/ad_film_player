@@ -16,10 +16,10 @@
     showRemaining: false, //Show remaining ad time > works if allowSkip is false
     adsOptions: {}, //Options passed to the ads plugin
     lang: {
-      'skip':'Skip',
-      'skip in': 'Skip in ',
-      'advertisement': 'Advertisement',
-      'video start in': 'Video will start in: '
+      'skip':'Пропустить',
+      'skip in': 'Можно будет пропустить через ',
+      'advertisement': 'Реклама',
+      'video start in': 'Видео начнется в: '
     } //Language entries for translation
   }, prerollPlugin;
 
@@ -31,6 +31,8 @@
   //
   prerollPlugin = function(options) {
     var settings = videojs.mergeOptions(defaults, options), player = this;
+    var counter = 0;
+    var played = false;
     player.ads(settings.adsOptions);
     player.preroll = {adDone:false};
     player.on('contentupdate', function() {
@@ -40,6 +42,12 @@
         player.trigger('adsready');
       }
     });
+
+    player.on('readyformidroll', function(){
+      counter = 2
+      player.trigger('readyforpreroll');
+    });
+
     player.on('readyforpreroll', function() {
       // No video? No ad.
       if(!player.preroll.shouldPlayPreroll()){
@@ -51,7 +59,7 @@
       player.ads.startLinearAdMode();
 
       // Change player src to ad src
-      player.src(settings.src);
+      player.src(settings.src[counter]);
       player.one('durationchange', function() {
         player.play();
       });
@@ -138,22 +146,22 @@
       if(typeof player.preroll.blocker !== 'undefined'){
         player.preroll.blocker.parentNode.removeChild(player.preroll.blocker);
       }
-      //player.off('timeupdate', player.preroll.timeupdate);
-      player.off('adended', player.preroll.exitPreroll);
-      player.off('error', player.preroll.prerollError);
-      if (settings.repeatAd !== true){
-        player.preroll.adDone=true;
+      if (settings.src[1] && !played){
+        played = true;
+        counter = 1
+        player.trigger('readyforpreroll')
+      }else{
+        //player.off('timeupdate', player.preroll.timeupdate);
+        player.off('adended', player.preroll.exitPreroll);
+        player.off('error', player.preroll.prerollError);
+        if (settings.repeatAd !== true){
+          player.preroll.adDone=true;
+        }
+        player.loadingSpinner.show(); //Show Spinner to provide feedback of video loading status to user
+        player.posterImage.hide(); //Hide Poster Image to provide feedback of video loading status to user
+        player.bigPlayButton.hide(); //Hide Play Button to provide feedback of video loading status to user
+        player.ads.endLinearAdMode();
       }
-      player.loadingSpinner.show(); //Show Spinner to provide feedback of video loading status to user
-      player.posterImage.hide(); //Hide Poster Image to provide feedback of video loading status to user
-      player.bigPlayButton.hide(); //Hide Play Button to provide feedback of video loading status to user
-      player.ads.endLinearAdMode();
-      if (settings.src[1]){
-        console.log(settings.src);
-        settings.src = settings.src[1];
-        console.log(settings.src);
-        player.trigger('adsready');
-      };
     };
     player.preroll.timeupdate = function(e) {
       player.loadingSpinner.hide();
